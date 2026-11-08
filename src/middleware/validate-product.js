@@ -1,8 +1,10 @@
 import { ApiError } from './error-handler.js';
 
-// Validates and normalises POST /products body into { name, price }.
+// Validates and normalises a product body into { name, price }.
+// Used by POST (create) and PUT (update); PUT additionally requires the
+// body id to match the path id, checked here so the rule lives in one place.
 export function validateProduct(req, res, next) {
-  const { name, price } = req.body ?? {};
+  const { id, name, price } = req.body ?? {};
   const errors = [];
 
   if (typeof name !== 'string' || name.trim() === '') {
@@ -12,6 +14,14 @@ export function validateProduct(req, res, next) {
   const parsedPrice = typeof price === 'string' ? Number(price) : price;
   if (typeof parsedPrice !== 'number' || !Number.isFinite(parsedPrice) || parsedPrice < 0) {
     errors.push('price wajib berupa angka >= 0');
+  }
+
+  if (req.method === 'PUT') {
+    if (id === undefined) {
+      errors.push('id wajib disertakan pada body PUT');
+    } else if (Number(id) !== Number(req.params.id)) {
+      errors.push('id pada body harus sama dengan id pada path');
+    }
   }
 
   if (errors.length > 0) {

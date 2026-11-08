@@ -24,3 +24,12 @@ export const createProduct = asyncHandler(async (req, res) => {
   const product = await prisma.product.create({ data: req.body });
   res.status(201).json(product);
 });
+
+export const updateProduct = asyncHandler(async (req, res) => {
+  const product = await prisma.product.update({
+    where: { id: Number(req.params.id) },
+    data: req.body,
+  });
+
+  res.status(200).json(product);
+});

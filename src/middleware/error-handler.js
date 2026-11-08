@@ -1,3 +1,5 @@
+import { Prisma } from '@prisma/client';
+
 export class ApiError extends Error {
   constructor(status, message) {
     super(message);
@@ -17,6 +19,11 @@ export function errorHandler(err, req, res, next) {
   // Malformed JSON body is thrown by express.json() with status 400.
   if (err.type === 'entity.parse.failed') {
     return res.status(400).json({ message: 'Body request bukan JSON yang valid' });
+  }
+
+  // P2025: the row targeted by update/delete does not exist.
+  if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
+    return res.status(404).json({ message: 'Produk tidak ditemukan' });
   }
 
   const status = err.status || 500;

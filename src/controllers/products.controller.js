@@ -1,29 +1,40 @@
+import { prisma } from '../../lib/prisma.js';
+import { asyncHandler } from '../utils/async-handler.js';
 import { ApiError } from '../middleware/error-handler.js';
 
-let products = [
-  { id: 1, name: 'Buku', price: 15000 },
-  { id: 2, name: 'Pulpen', price: 5000 },
-];
-let nextId = 3;
-
-export function getProducts(req, res) {
+export const getProducts = asyncHandler(async (req, res) => {
+  const products = await prisma.product.findMany({ orderBy: { id: 'asc' } });
   res.status(200).json(products);
-}
+});
 
-export function getProductById(req, res, next) {
-  const product = products.find((p) => p.id === Number(req.params.id));
+export const getProductById = asyncHandler(async (req, res) => {
+  const product = await prisma.product.findUnique({
+    where: { id: Number(req.params.id) },
+  });
 
   if (!product) {
-    return next(new ApiError(404, 'Produk tidak ditemukan'));
+    throw new ApiError(404, 'Produk tidak ditemukan');
   }
 
   res.status(200).json(product);
-}
+});
 
 // req.body is already validated and normalised by validateProduct.
-export function createProduct(req, res) {
-  const product = { id: nextId++, ...req.body };
-
-  products.push(product);
+export const createProduct = asyncHandler(async (req, res) => {
+  const product = await prisma.product.create({ data: req.body });
   res.status(201).json(product);
-}
+});
+
+export const updateProduct = asyncHandler(async (req, res) => {
+  const product = await prisma.product.update({
+    where: { id: Number(req.params.id) },
+    data: req.body,
+  });
+
+  res.status(200).json(product);
+});
+
+export const deleteProduct = asyncHandler(async (req, res) => {
+  await prisma.product.delete({ where: { id: Number(req.params.id) } });
+  res.status(204).end();
+});

@@ -8,6 +8,12 @@
     "start": "node src/index.js"
   },
   "dependencies": {
-    "express": "^4.21.2"
+    "@prisma/adapter-pg": "7.10.1",
+    "@prisma/client": "7.10.1",
+    "express": "^4.21.2",
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "prisma": "7.10.1"
   }
 }
